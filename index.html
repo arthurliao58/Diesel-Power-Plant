@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>柴油機發電廠技術互動學習平台 | Diesel Power Plant Engineering</title>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-group">
+        <div class="brand-icon">
+          <i class="fas fa-industry"></i>
+        </div>
+        <div class="brand-text">
+          <h1>柴油機發電廠技術互動學習系統</h1>
+          <span>Diesel Power Plant Engineering Hub</span>
+        </div>
+      </div>
+
+      <nav class="main-nav">
+        <button class="nav-item active" data-tab="layout">
+          <i class="fas fa-project-diagram"></i>
+          <span>電廠系統架構</span>
+        </button>
+        <button class="nav-item" data-tab="videos">
+          <i class="fab fa-youtube"></i>
+          <span>課程影片庫 (46部)</span>
+        </button>
+        <button class="nav-item" data-tab="simulator">
+          <i class="fas fa-sliders-h"></i>
+          <span>運轉參數模擬</span>
+        </button>
+        <button class="nav-item" data-tab="knowledge">
+          <i class="fas fa-book-open"></i>
+          <span>工程技術手冊</span>
+        </button>
+        <button class="nav-item" data-tab="quiz">
+          <i class="fas fa-graduation-cap"></i>
+          <span>課後自我評測</span>
+        </button>
+      </nav>
+
+      <div class="header-actions">
+        <div class="progress-pill">
+          <div class="progress-info">
+            <span class="progress-label">影片學習進度</span>
+            <span class="progress-val" id="stat-completed-count">0 / 46 部</span>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="stat-progress-bar" style="width: 0%;"></div>
+          </div>
+          <span class="progress-val" id="stat-completed-pct">0%</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="app-main">
+
+    <!-- ================= VIEW 1: INTERACTIVE PLANT LAYOUT ================= -->
+    <section class="tab-view active" id="view-layout">
+      <div class="layout-grid">
+        <!-- Left Quick Select -->
+        <aside class="comp-quick-select">
+          <h3><i class="fas fa-th-list"></i> 9 大核心子系統</h3>
+          <div class="comp-list" id="component-quick-list">
+            <!-- Populated dynamically -->
+          </div>
+        </aside>
+
+        <!-- Center Diagram Canvas -->
+        <div id="diagram-canvas">
+          <!-- Populated by PlantDiagram -->
+        </div>
+
+        <!-- Right Component Details Panel -->
+        <aside class="comp-detail-panel" id="component-detail-panel">
+          <!-- Populated dynamically upon component selection -->
+        </aside>
+      </div>
+    </section>
+
+    <!-- ================= VIEW 2: COMPLETE VIDEO CURRICULUM ================= -->
+    <section class="tab-view" id="view-videos">
+      <div class="video-view-header">
+        <div class="video-header-title">
+          <h2><i class="fab fa-youtube text-danger"></i> 全套柴油機發電廠工程課程影片</h2>
+          <p>依據來源影片《Essential Components of Diesel Power Plant》完整收錄 6 大核心章節、46 部技術教學影片與技術要點精華</p>
+        </div>
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" id="search-input" placeholder="搜尋影片、技術關鍵字（如：潤滑、冷卻、增壓、調速）...">
+        </div>
+      </div>
+
+      <!-- Chapter Tabs Filter Bar -->
+      <div class="chapter-filter-bar" id="chapter-filter-bar">
+        <!-- Rendered by App -->
+      </div>
+
+      <!-- Video Cards Grid -->
+      <div id="video-cards-grid">
+        <!-- Rendered by App -->
+      </div>
+    </section>
+
+    <!-- ================= VIEW 3: SIMULATION LAB ================= -->
+    <section class="tab-view" id="view-simulator">
+      <div id="simulator-container">
+        <!-- Populated by PlantSimulator -->
+      </div>
+    </section>
+
+    <!-- ================= VIEW 4: KNOWLEDGE BASE ================= -->
+    <section class="tab-view" id="view-knowledge">
+      <div class="kb-wrapper">
+        <div class="kb-header">
+          <h3><i class="fas fa-book-reader"></i> 柴油發電廠核心工程技術手冊</h3>
+          <p>深入探討熱力學狄塞爾循環、燃油超高壓霧化噴射、調速器頻率閉迴路控制與能量平衡</p>
+        </div>
+        <div class="kb-accordion" id="knowledge-accordion">
+          <!-- Rendered by App -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= VIEW 5: QUIZ ASSESSMENT ================= -->
+    <section class="tab-view" id="view-quiz">
+      <div id="quiz-container">
+        <!-- Populated by PlantQuiz -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Video Modal -->
+  <div class="modal-backdrop" id="modal-backdrop"></div>
+  <div class="video-modal" id="video-modal">
+    <div class="modal-header">
+      <h3 id="modal-video-title">影片標題</h3>
+      <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+    </div>
+    <div class="modal-video-container" id="modal-iframe-container">
+      <!-- YouTube Iframe injected here -->
+    </div>
+    <div class="modal-body" id="modal-video-desc">
+      <!-- Video description and key takeaways -->
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/diagram.js"></script>
+  <script src="js/simulator.js"></script>
+  <script src="js/quiz.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
