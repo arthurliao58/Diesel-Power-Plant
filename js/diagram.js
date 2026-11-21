@@ -178,8 +178,8 @@ class PlantDiagram {
               <path class="flow-path-cooling animating" d="M 730 560 L 510 560 L 510 440" stroke="#38bdf8" stroke-width="3" stroke-dasharray="8 6" />
 
               <!-- LUBRICATION LOOP (Gold/Green) -->
-              <path class="pipe-bg" d="M 450 460 L 450 590 L 320 590 L 320 460" stroke="#15803d" stroke-width="5" />
-              <path class="flow-path-lube animating" d="M 450 460 L 450 590 L 320 590 L 320 460" stroke="#22c55e" stroke-width="3" stroke-dasharray="6 6" />
+              <path class="pipe-bg" d="M 450 460 L 450 585 L 330 585 L 330 420 L 420 420" stroke="#15803d" stroke-width="5" stroke-linejoin="round" />
+              <path class="flow-path-lube animating" d="M 450 460 L 450 585 L 330 585 L 330 420 L 420 420" stroke="#22c55e" stroke-width="3" stroke-dasharray="6 6" stroke-linejoin="round" />
 
               <!-- STARTING AIR PIPE (Purple) -->
               <path class="pipe-bg" d="M 120 170 L 220 170 L 220 350 L 420 350" stroke="#6d28d9" stroke-width="5" />
