@@ -6,6 +6,7 @@
 const PLANT_COMPONENTS = [
   {
     id: "engine",
+    number: 1,
     nameZh: "柴油引擎 (主驅動機)",
     nameEn: "Diesel Engine (Prime Mover)",
     category: "動力核心",
@@ -31,6 +32,7 @@ const PLANT_COMPONENTS = [
   },
   {
     id: "fuel_system",
+    number: 2,
     nameZh: "燃油供應系統",
     nameEn: "Fuel Supply & Injection Combustion System",
     category: "燃燒介質",
@@ -55,6 +57,7 @@ const PLANT_COMPONENTS = [
   },
   {
     id: "air_intake",
+    number: 3,
     nameZh: "進氣與增壓系統",
     nameEn: "Air Intake & Supercharging System",
     category: "助燃系統",
@@ -78,6 +81,7 @@ const PLANT_COMPONENTS = [
   },
   {
     id: "exhaust_system",
+    number: 4,
     nameZh: "排氣與消音系統",
     nameEn: "Exhaust & Silencer System",
     category: "排放控制",
@@ -102,6 +106,7 @@ const PLANT_COMPONENTS = [
   },
   {
     id: "cooling_system",
+    number: 5,
     nameZh: "冷卻系統",
     nameEn: "Cooling System",
     category: "熱平衡保障",
@@ -127,6 +132,7 @@ const PLANT_COMPONENTS = [
   },
   {
     id: "lubrication_system",
+    number: 6,
     nameZh: "潤滑系統",
     nameEn: "Lubrication System",
     category: "抗磨降損",
@@ -151,6 +157,7 @@ const PLANT_COMPONENTS = [
   },
   {
     id: "starting_system",
+    number: 7,
     nameZh: "啟動與停機系統",
     nameEn: "Starting & Stopping System",
     category: "運轉控制",
@@ -174,6 +181,7 @@ const PLANT_COMPONENTS = [
   },
   {
     id: "governing_system",
+    number: 8,
     nameZh: "調速系統",
     nameEn: "Governing System",
     category: "頻率與負載調節",
@@ -197,6 +205,7 @@ const PLANT_COMPONENTS = [
   },
   {
     id: "generator",
+    number: 9,
     nameZh: "發電機與電網",
     nameEn: "Generator / Alternator & Grid",
     category: "電能轉換",

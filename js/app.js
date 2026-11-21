@@ -780,7 +780,7 @@ class App {
             <div class="link-banner-tags">
               ${linkedComponents.map(comp => `
                 <button class="btn-locate-diagram-comp" data-comp-id="${comp.id}" title="點擊切換至技術架構圖並定位此組件">
-                  <span class="comp-idx-pill">#${comp.number}</span>
+                  <span class="comp-idx-pill">#${comp.number || (PLANT_COMPONENTS.findIndex(c => c.id === comp.id) + 1)}</span>
                   <span class="comp-name-pill">${comp.nameZh}</span>
                   <i class="fas fa-crosshairs locate-icon"></i>
                   <span class="locate-tip">在架構圖中定位</span>
