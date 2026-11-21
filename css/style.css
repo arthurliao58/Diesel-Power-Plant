@@ -533,6 +533,52 @@ body {
   color: #0f172a;
 }
 
+/* Draggable Subsystems Controller */
+.drag-controls-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(15, 23, 42, 0.7);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.btn-reset-layout {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.btn-reset-layout:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+}
+
+.drag-hint-badge {
+  font-size: 0.75rem;
+  color: var(--accent-cyan);
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+}
+
 .svg-viewport-container {
   padding: 1rem;
   display: flex;
@@ -546,15 +592,25 @@ body {
   max-height: 720px;
 }
 
-/* SVG Node Interactivity */
+/* SVG Node Interactivity & Dragging */
 .plant-node {
-  cursor: pointer;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  transition: opacity 0.2s ease;
 }
 
 .plant-node:hover rect {
   stroke-width: 3.5px;
-  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5));
+  filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.5));
+}
+
+.plant-node.dragging {
+  cursor: grabbing !important;
+  filter: drop-shadow(0 8px 24px rgba(56, 189, 248, 0.85)) brightness(1.15) !important;
+  opacity: 0.95;
+  transition: none !important;
 }
 
 .plant-node.selected rect {

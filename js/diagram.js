@@ -17,6 +17,7 @@ class PlantDiagram {
     };
     this.selectedComponentId = "engine";
     this.fontScale = parseInt(localStorage.getItem("diagram_font_scale"), 10) || 100;
+    this.nodeOffsets = this.loadNodeOffsets();
     this.init();
   }
 
@@ -24,6 +25,8 @@ class PlantDiagram {
     this.render();
     this.attachEvents();
     this.setFontScale(this.fontScale);
+    this.applyAllNodeOffsets();
+    this.updatePipelines();
   }
 
   setFontScale(scalePercent) {
@@ -106,12 +109,20 @@ class PlantDiagram {
 
           <!-- Font Size Adjustment Controller -->
           <div class="font-size-control-group">
-            <span class="toolbar-label"><i class="fas fa-font"></i> 圖中字型大小:</span>
+            <span class="toolbar-label"><i class="fas fa-font"></i> 圖中字型:</span>
             <button class="btn-font-scale" id="btn-font-scale-down" title="縮小字體"><i class="fas fa-minus"></i></button>
             <input type="range" min="70" max="180" step="5" value="${this.fontScale}" id="diagram-font-scale-slider" class="font-scale-slider" title="滑動自訂圖中字型大小">
             <button class="btn-font-scale" id="btn-font-scale-up" title="放大字體"><i class="fas fa-plus"></i></button>
             <button class="btn-font-reset" id="btn-font-scale-reset" title="重設為預設大小 (100%)">
               <span id="diagram-font-scale-val">${this.fontScale}%</span>
+            </button>
+          </div>
+
+          <!-- Draggable Subsystems Controller -->
+          <div class="drag-controls-group">
+            <span class="drag-hint-badge" title="提示：可使用滑鼠按住圖中任一設備自由拖曳改變佈局"><i class="fas fa-arrows-alt"></i> 可滑鼠拖曳各子系統</span>
+            <button class="btn-reset-layout" id="btn-reset-layout" title="將所有子系統重設回預設位置">
+              <i class="fas fa-undo-alt"></i> 重設佈局位置
             </button>
           </div>
         </div>
@@ -158,43 +169,43 @@ class PlantDiagram {
             <!-- ================= FLOW PIPES (BACKGROUND) ================= -->
             <g id="flow-pipelines" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <!-- FUEL PIPELINE (Amber) -->
-              <path class="pipe-bg" d="M 80 520 L 140 520 L 140 420 L 190 420 L 190 310 L 250 310 L 250 250 L 330 250 L 330 330 L 420 330" stroke="#78350f" stroke-width="6" />
-              <path class="flow-path-fuel animating" d="M 80 520 L 140 520 L 140 420 L 190 420 L 190 310 L 250 310 L 250 250 L 330 250 L 330 330 L 420 330" stroke="#f59e0b" stroke-width="3" stroke-dasharray="8 6" />
+              <path class="pipe-bg pipe-fuel-bg" d="M 80 520 L 140 520 L 140 420 L 190 420 L 190 310 L 250 310 L 250 250 L 330 250 L 330 330 L 420 330" stroke="#78350f" stroke-width="6" />
+              <path class="flow-path-fuel pipe-fuel-flow animating" d="M 80 520 L 140 520 L 140 420 L 190 420 L 190 310 L 250 310 L 250 250 L 330 250 L 330 330 L 420 330" stroke="#f59e0b" stroke-width="3" stroke-dasharray="8 6" />
 
               <!-- AIR INTAKE PIPELINE (Sky Blue) -->
-              <path class="pipe-bg" d="M 280 80 L 370 80 L 370 140 L 460 140 L 460 270" stroke="#0369a1" stroke-width="7" />
-              <path class="flow-path-air animating" d="M 280 80 L 370 80 L 370 140 L 460 140 L 460 270" stroke="#38bdf8" stroke-width="4" stroke-dasharray="10 8" />
+              <path class="pipe-bg pipe-air-bg" d="M 280 80 L 370 80 L 370 140 L 460 140 L 460 270" stroke="#0369a1" stroke-width="7" />
+              <path class="flow-path-air pipe-air-flow animating" d="M 280 80 L 370 80 L 370 140 L 460 140 L 460 270" stroke="#38bdf8" stroke-width="4" stroke-dasharray="10 8" />
 
               <!-- EXHAUST PIPELINE (Crimson/Orange) -->
-              <path class="pipe-bg" d="M 520 270 L 520 140 L 620 140 L 620 60" stroke="#991b1b" stroke-width="8" />
-              <path class="flow-path-air animating" d="M 520 270 L 520 140 L 620 140 L 620 60" stroke="#ef4444" stroke-width="4" stroke-dasharray="10 6" />
+              <path class="pipe-bg pipe-exhaust-bg" d="M 520 270 L 520 140 L 620 140 L 620 60" stroke="#991b1b" stroke-width="8" />
+              <path class="flow-path-air pipe-exhaust-flow animating" d="M 520 270 L 520 140 L 620 140 L 620 60" stroke="#ef4444" stroke-width="4" stroke-dasharray="10 6" />
 
               <!-- COOLING WATER LOOP (Cyan/Teal) -->
               <!-- Hot water out to cooling tower -->
-              <path class="pipe-bg" d="M 540 370 L 610 370 L 610 520 L 730 520" stroke="#0e7490" stroke-width="6" />
-              <path class="flow-path-cooling animating" d="M 540 370 L 610 370 L 610 520 L 730 520" stroke="#06b6d4" stroke-width="3" stroke-dasharray="8 6" />
+              <path class="pipe-bg pipe-cool-hot-bg" d="M 540 370 L 610 370 L 610 520 L 730 520" stroke="#0e7490" stroke-width="6" />
+              <path class="flow-path-cooling pipe-cool-hot-flow animating" d="M 540 370 L 610 370 L 610 520 L 730 520" stroke="#06b6d4" stroke-width="3" stroke-dasharray="8 6" />
               <!-- Cold water returned to engine -->
-              <path class="pipe-bg" d="M 730 560 L 510 560 L 510 440" stroke="#0284c7" stroke-width="6" />
-              <path class="flow-path-cooling animating" d="M 730 560 L 510 560 L 510 440" stroke="#38bdf8" stroke-width="3" stroke-dasharray="8 6" />
+              <path class="pipe-bg pipe-cool-cold-bg" d="M 730 560 L 510 560 L 510 440" stroke="#0284c7" stroke-width="6" />
+              <path class="flow-path-cooling pipe-cool-cold-flow animating" d="M 730 560 L 510 560 L 510 440" stroke="#38bdf8" stroke-width="3" stroke-dasharray="8 6" />
 
               <!-- LUBRICATION LOOP (Gold/Green) -->
-              <path class="pipe-bg" d="M 450 460 L 450 585 L 330 585 L 330 420 L 420 420" stroke="#15803d" stroke-width="5" stroke-linejoin="round" />
-              <path class="flow-path-lube animating" d="M 450 460 L 450 585 L 330 585 L 330 420 L 420 420" stroke="#22c55e" stroke-width="3" stroke-dasharray="6 6" stroke-linejoin="round" />
+              <path class="pipe-bg pipe-lube-bg" d="M 450 460 L 450 585 L 330 585 L 330 420 L 420 420" stroke="#15803d" stroke-width="5" stroke-linejoin="round" />
+              <path class="flow-path-lube pipe-lube-flow animating" d="M 450 460 L 450 585 L 330 585 L 330 420 L 420 420" stroke="#22c55e" stroke-width="3" stroke-dasharray="6 6" stroke-linejoin="round" />
 
               <!-- STARTING AIR PIPE (Purple) -->
-              <path class="pipe-bg" d="M 120 170 L 220 170 L 220 350 L 420 350" stroke="#6d28d9" stroke-width="5" />
-              <path class="flow-path-air animating" d="M 120 170 L 220 170 L 220 350 L 420 350" stroke="#a855f7" stroke-width="2.5" stroke-dasharray="6 4" />
+              <path class="pipe-bg pipe-start-bg" d="M 120 170 L 220 170 L 220 350 L 420 350" stroke="#6d28d9" stroke-width="5" />
+              <path class="flow-path-air pipe-start-flow animating" d="M 120 170 L 220 170 L 220 350 L 420 350" stroke="#a855f7" stroke-width="2.5" stroke-dasharray="6 4" />
 
               <!-- MECHANICAL SHAFT COUPLING -->
-              <rect x="560" y="340" width="80" height="20" fill="#64748b" stroke="#334155" stroke-width="2" rx="3" />
-              <line x1="560" y1="350" x2="640" y2="350" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="5 3" />
+              <path id="pipe-shaft-rect" d="M 560 340 L 640 340 L 640 360 L 560 360 Z" fill="#64748b" stroke="#334155" stroke-width="2" />
+              <line id="pipe-shaft-line" x1="560" y1="350" x2="640" y2="350" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="5 3" />
 
               <!-- GOVERNOR FEEDBACK LOOP -->
-              <path d="M 550 330 L 550 220 L 480 220 L 440 290" fill="none" stroke="#eab308" stroke-width="2" stroke-dasharray="4 4" />
+              <path id="pipe-gov-path" d="M 550 330 L 550 220 L 480 220 L 440 290" fill="none" stroke="#eab308" stroke-width="2" stroke-dasharray="4 4" />
 
               <!-- ELECTRIC POWER OUTPUT (Yellow/Electric) -->
-              <path class="pipe-bg" d="M 790 350 L 890 350 L 890 260 L 980 260" stroke="#854d0e" stroke-width="7" />
-              <path class="flow-path-power animating" d="M 790 350 L 890 350 L 890 260 L 980 260" stroke="#facc15" stroke-width="4" stroke-dasharray="10 5" filter="url(#glow)" />
+              <path class="pipe-bg pipe-power-bg" d="M 790 350 L 890 350 L 890 260 L 980 260" stroke="#854d0e" stroke-width="7" />
+              <path class="flow-path-power pipe-power-flow animating" d="M 790 350 L 890 350 L 890 260 L 980 260" stroke="#facc15" stroke-width="4" stroke-dasharray="10 5" filter="url(#glow)" />
             </g>
 
             <!-- ================= INTERACTIVE NODES ================= -->
@@ -444,13 +455,224 @@ class PlantDiagram {
       });
     }
 
-    // Node clicks
+    // Reset layout button
+    const btnResetLayout = this.container.querySelector("#btn-reset-layout");
+    if (btnResetLayout) {
+      btnResetLayout.addEventListener("click", () => {
+        this.resetNodeOffsets();
+      });
+    }
+
+    // Initialize Draggable Nodes
+    this.initDraggableNodes();
+  }
+
+  loadNodeOffsets() {
+    try {
+      const saved = localStorage.getItem("diesel_diagram_node_offsets");
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  saveNodeOffsets() {
+    try {
+      localStorage.setItem("diesel_diagram_node_offsets", JSON.stringify(this.nodeOffsets));
+    } catch (e) {}
+  }
+
+  resetNodeOffsets() {
+    this.nodeOffsets = {};
+    try {
+      localStorage.removeItem("diesel_diagram_node_offsets");
+    } catch (e) {}
+
     const nodes = this.container.querySelectorAll(".plant-node");
     nodes.forEach(node => {
-      node.addEventListener("click", () => {
-        const id = node.dataset.id;
-        this.selectComponent(id);
-      });
+      node.style.transition = "transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)";
+      node.setAttribute("transform", "translate(0, 0)");
+      setTimeout(() => {
+        node.style.transition = "";
+      }, 450);
     });
+
+    this.updatePipelines();
+  }
+
+  getOffset(id) {
+    return this.nodeOffsets[id] || { x: 0, y: 0 };
+  }
+
+  applyNodeOffset(node) {
+    const id = node.dataset.id;
+    const off = this.getOffset(id);
+    node.setAttribute("transform", `translate(${off.x}, ${off.y})`);
+  }
+
+  applyAllNodeOffsets() {
+    const nodes = this.container.querySelectorAll(".plant-node");
+    nodes.forEach(node => this.applyNodeOffset(node));
+  }
+
+  screenToSvg(clientX, clientY) {
+    const svg = this.container.querySelector("#plant-schematic");
+    if (!svg) return { x: 0, y: 0 };
+    const pt = svg.createSVGPoint();
+    pt.x = clientX;
+    pt.y = clientY;
+    const ctm = svg.getScreenCTM();
+    if (ctm) {
+      return pt.matrixTransform(ctm.inverse());
+    }
+    const rect = svg.getBoundingClientRect();
+    return {
+      x: ((clientX - rect.left) / rect.width) * 1100,
+      y: ((clientY - rect.top) / rect.height) * 680
+    };
+  }
+
+  initDraggableNodes() {
+    const svg = this.container.querySelector("#plant-schematic");
+    if (!svg) return;
+
+    const nodes = this.container.querySelectorAll(".plant-node");
+    nodes.forEach(node => {
+      const id = node.dataset.id;
+      let isDragging = false;
+      let hasMoved = false;
+      let startSvg = { x: 0, y: 0 };
+      let initialOffset = { x: 0, y: 0 };
+
+      const onPointerDown = (e) => {
+        if (e.button !== undefined && e.button !== 0) return;
+        isDragging = true;
+        hasMoved = false;
+        startSvg = this.screenToSvg(e.clientX, e.clientY);
+        initialOffset = this.getOffset(id);
+
+        node.classList.add("dragging");
+        // Bring node to front of SVG
+        svg.appendChild(node);
+        try {
+          node.setPointerCapture(e.pointerId);
+        } catch (err) {}
+      };
+
+      const onPointerMove = (e) => {
+        if (!isDragging) return;
+        const currentSvg = this.screenToSvg(e.clientX, e.clientY);
+        const dx = currentSvg.x - startSvg.x;
+        const dy = currentSvg.y - startSvg.y;
+
+        if (Math.hypot(dx, dy) > 3) {
+          hasMoved = true;
+        }
+
+        const newX = Math.round(initialOffset.x + dx);
+        const newY = Math.round(initialOffset.y + dy);
+
+        this.nodeOffsets[id] = { x: newX, y: newY };
+        node.setAttribute("transform", `translate(${newX}, ${newY})`);
+        this.updatePipelines();
+      };
+
+      const onPointerUp = (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        node.classList.remove("dragging");
+        try {
+          node.releasePointerCapture(e.pointerId);
+        } catch (err) {}
+
+        if (hasMoved) {
+          this.saveNodeOffsets();
+        }
+        this.selectComponent(id);
+      };
+
+      node.addEventListener("pointerdown", onPointerDown);
+      node.addEventListener("pointermove", onPointerMove);
+      node.addEventListener("pointerup", onPointerUp);
+      node.addEventListener("pointercancel", onPointerUp);
+    });
+  }
+
+  updatePipelines() {
+    const oEng = this.getOffset("engine");
+    const oFuel = this.getOffset("fuel_system");
+    const oAir = this.getOffset("air_intake");
+    const oExh = this.getOffset("exhaust_system");
+    const oCool = this.getOffset("cooling_system");
+    const oLube = this.getOffset("lubrication_system");
+    const oStart = this.getOffset("starting_system");
+    const oGov = this.getOffset("governing_system");
+    const oGen = this.getOffset("generator");
+
+    // 1. Fuel Pipeline
+    const fuelD = `M ${80 + oFuel.x} ${520 + oFuel.y} L ${140 + oFuel.x} ${520 + oFuel.y} L ${140 + oFuel.x} ${420 + oFuel.y} L ${190 + oFuel.x} ${420 + oFuel.y} L ${190 + oFuel.x} ${310 + oFuel.y} L ${250 + oFuel.x} ${310 + oFuel.y} L ${250 + oFuel.x} ${250 + oFuel.y} L ${330 + oFuel.x} ${250 + oFuel.y} L ${330 + oFuel.x} ${330 + oFuel.y} L ${420 + oEng.x} ${330 + oEng.y}`;
+    this.setPathD(".pipe-fuel-bg", fuelD);
+    this.setPathD(".pipe-fuel-flow", fuelD);
+
+    // 2. Air Intake Pipeline
+    const airD = `M ${280 + oAir.x} ${80 + oAir.y} L ${370 + oAir.x} ${80 + oAir.y} L ${370 + oAir.x} ${140 + oAir.y} L ${460 + oAir.x} ${140 + oAir.y} L ${460 + oEng.x} ${270 + oEng.y}`;
+    this.setPathD(".pipe-air-bg", airD);
+    this.setPathD(".pipe-air-flow", airD);
+
+    // 3. Exhaust Pipeline
+    const exhD = `M ${520 + oEng.x} ${270 + oEng.y} L ${520 + oExh.x} ${140 + oExh.y} L ${620 + oExh.x} ${140 + oExh.y} L ${620 + oExh.x} ${60 + oExh.y}`;
+    this.setPathD(".pipe-exhaust-bg", exhD);
+    this.setPathD(".pipe-exhaust-flow", exhD);
+
+    // 4. Cooling Water Hot Out
+    const coolHotD = `M ${540 + oEng.x} ${370 + oEng.y} L ${610 + oEng.x} ${370 + oEng.y} L ${610 + oCool.x} ${520 + oCool.y} L ${730 + oCool.x} ${520 + oCool.y}`;
+    this.setPathD(".pipe-cool-hot-bg", coolHotD);
+    this.setPathD(".pipe-cool-hot-flow", coolHotD);
+
+    // 5. Cooling Water Cold Return
+    const coolColdD = `M ${730 + oCool.x} ${560 + oCool.y} L ${510 + oEng.x} ${560 + oCool.y} L ${510 + oEng.x} ${440 + oEng.y}`;
+    this.setPathD(".pipe-cool-cold-bg", coolColdD);
+    this.setPathD(".pipe-cool-cold-flow", coolColdD);
+
+    // 6. Lubrication Loop
+    const lubeD = `M ${450 + oEng.x} ${460 + oEng.y} L ${450 + oLube.x} ${585 + oLube.y} L ${330 + oLube.x} ${585 + oLube.y} L ${330 + oLube.x} ${420 + oEng.y} L ${420 + oEng.x} ${420 + oEng.y}`;
+    this.setPathD(".pipe-lube-bg", lubeD);
+    this.setPathD(".pipe-lube-flow", lubeD);
+
+    // 7. Starting Air Pipe
+    const startD = `M ${120 + oStart.x} ${170 + oStart.y} L ${220 + oStart.x} ${170 + oStart.y} L ${220 + oStart.x} ${350 + oEng.y} L ${420 + oEng.x} ${350 + oEng.y}`;
+    this.setPathD(".pipe-start-bg", startD);
+    this.setPathD(".pipe-start-flow", startD);
+
+    // 8. Mechanical Shaft Coupling
+    const shaftX1 = 560 + oEng.x;
+    const shaftY1 = 350 + oEng.y;
+    const shaftX2 = 640 + oGen.x;
+    const shaftY2 = 350 + oGen.y;
+    const shaftRect = this.container.querySelector("#pipe-shaft-rect");
+    const shaftLine = this.container.querySelector("#pipe-shaft-line");
+    if (shaftRect) {
+      shaftRect.setAttribute("d", `M ${shaftX1} ${shaftY1 - 10} L ${shaftX2} ${shaftY2 - 10} L ${shaftX2} ${shaftY2 + 10} L ${shaftX1} ${shaftY1 + 10} Z`);
+    }
+    if (shaftLine) {
+      shaftLine.setAttribute("x1", shaftX1);
+      shaftLine.setAttribute("y1", shaftY1);
+      shaftLine.setAttribute("x2", shaftX2);
+      shaftLine.setAttribute("y2", shaftY2);
+    }
+
+    // 9. Governor Feedback Loop
+    const govD = `M ${550 + oEng.x} ${330 + oEng.y} L ${550 + oGov.x} ${220 + oGov.y} L ${480 + oGov.x} ${220 + oGov.y} L ${440 + oEng.x} ${290 + oEng.y}`;
+    this.setPathD("#pipe-gov-path", govD);
+
+    // 10. Electric Power Output
+    const powerD = `M ${790 + oGen.x} ${350 + oGen.y} L ${890 + oGen.x} ${350 + oGen.y} L ${890 + oGen.x} ${260 + oGen.y} L ${980 + oGen.x} ${260 + oGen.y}`;
+    this.setPathD(".pipe-power-bg", powerD);
+    this.setPathD(".pipe-power-flow", powerD);
+  }
+
+  setPathD(selector, d) {
+    const el = this.container.querySelector(selector);
+    if (el) el.setAttribute("d", d);
   }
 }
