@@ -43,6 +43,10 @@
           <i class="fas fa-book-open"></i>
           <span>工程技術手冊</span>
         </button>
+        <button class="nav-item" data-tab="transcripts">
+          <i class="fas fa-file-alt"></i>
+          <span>全文逐字稿資料庫</span>
+        </button>
         <button class="nav-item" data-tab="quiz">
           <i class="fas fa-graduation-cap"></i>
           <span>課後自我評測</span>
@@ -134,7 +138,45 @@
       </div>
     </section>
 
-    <!-- ================= VIEW 5: QUIZ ASSESSMENT ================= -->
+    <!-- ================= VIEW 5: TRANSCRIPTS DATABASE ================= -->
+    <section class="tab-view" id="view-transcripts">
+      <div class="transcripts-wrapper">
+        <div class="transcripts-header">
+          <div class="transcripts-title-group">
+            <h2><i class="fas fa-file-alt text-accent"></i> 46 部工程影片中文全文逐字稿資料庫</h2>
+            <p>全章節系統化歸納整理，支援即時全文檢索、中英雙語對照、技術核心精華提取與一鍵複製講義</p>
+          </div>
+          <div class="transcripts-actions">
+            <div class="search-box transcript-search">
+              <i class="fas fa-search"></i>
+              <input type="text" id="transcript-search-input" placeholder="在 46 部逐字稿中全文檢索（如：十六烷值、節溫器、下垂率）...">
+            </div>
+            <a href="database/transcripts.json" download="diesel_transcripts.json" class="btn btn-outline btn-sm">
+              <i class="fas fa-download"></i> 下載 JSON
+            </a>
+          </div>
+        </div>
+
+        <div class="transcripts-layout">
+          <!-- Left Chapter & Video Explorer List -->
+          <aside class="transcripts-sidebar">
+            <div class="sidebar-header">
+              <span>章節與影片目錄 (46 部)</span>
+            </div>
+            <div class="transcripts-tree" id="transcripts-tree">
+              <!-- Rendered by JS -->
+            </div>
+          </aside>
+
+          <!-- Right Content Reader -->
+          <article class="transcripts-reader" id="transcripts-reader">
+            <!-- Rendered by JS -->
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= VIEW 6: QUIZ ASSESSMENT ================= -->
     <section class="tab-view" id="view-quiz">
       <div id="quiz-container">
         <!-- Populated by PlantQuiz -->
@@ -160,6 +202,7 @@
 
   <!-- Scripts -->
   <script src="js/data.js"></script>
+  <script src="js/transcripts_data.js"></script>
   <script src="js/diagram.js"></script>
   <script src="js/simulator.js"></script>
   <script src="js/quiz.js"></script>

@@ -46,6 +46,7 @@ class App {
     this.initDiagramView();
     this.initVideoView();
     this.initKnowledgeView();
+    this.initTranscriptsView();
     this.initSearch();
     this.initModal();
 
@@ -69,7 +70,7 @@ class App {
 
     // Handle hash route if any
     const hash = window.location.hash.replace("#", "");
-    if (["layout", "videos", "simulator", "knowledge", "quiz"].includes(hash)) {
+    if (["layout", "videos", "simulator", "knowledge", "transcripts", "quiz"].includes(hash)) {
       this.switchTab(hash);
     }
   }
@@ -511,6 +512,205 @@ class App {
       title.addEventListener("click", () => {
         const item = title.parentElement;
         item.classList.toggle("open");
+      });
+    });
+  }
+
+  /* ==========================================================================
+     TRANSCRIPTS DATABASE METHODS
+     ========================================================================== */
+
+  initTranscriptsView() {
+    this.selectedTranscriptVideoId = "QDP2PCo0jMM";
+    this.renderTranscriptsTree();
+    this.displayTranscript(this.selectedTranscriptVideoId);
+
+    const searchInput = document.getElementById("transcript-search-input");
+    if (searchInput) {
+      searchInput.addEventListener("input", (e) => {
+        const query = e.target.value.trim().toLowerCase();
+        this.renderTranscriptsTree(query);
+      });
+    }
+  }
+
+  renderTranscriptsTree(filterText = "") {
+    const treeContainer = document.getElementById("transcripts-tree");
+    if (!treeContainer || typeof FULL_TRANSCRIPTS_DATABASE === "undefined") return;
+
+    let html = "";
+    let matchCount = 0;
+
+    FULL_TRANSCRIPTS_DATABASE.forEach(ch => {
+      const filteredVideos = ch.videos.filter(v => {
+        if (!filterText) return true;
+        return v.title_zh.toLowerCase().includes(filterText) ||
+               v.title_en.toLowerCase().includes(filterText) ||
+               v.summary.toLowerCase().includes(filterText) ||
+               v.transcript_zh.toLowerCase().includes(filterText);
+      });
+
+      if (filteredVideos.length === 0) return;
+      matchCount += filteredVideos.length;
+
+      const hasSelected = filteredVideos.some(v => v.video_id === this.selectedTranscriptVideoId);
+
+      html += `
+        <div class="tree-chapter-group ${filterText || hasSelected ? 'open' : ''}">
+          <div class="tree-chapter-header">
+            <span class="tree-chap-badge">${ch.chapter_num}</span>
+            <span class="tree-chap-title">${ch.chapter_title_zh}</span>
+            <span class="tree-count">${filteredVideos.length}</span>
+            <i class="fas fa-chevron-down tree-chevron"></i>
+          </div>
+          <div class="tree-videos-list">
+            ${filteredVideos.map(v => `
+              <button class="tree-video-btn ${v.video_id === this.selectedTranscriptVideoId ? 'active' : ''}" data-video-id="${v.video_id}">
+                <i class="fab fa-youtube tree-vid-icon"></i>
+                <div class="tree-vid-meta">
+                  <span class="tree-vid-title">${v.title_zh}</span>
+                  <span class="tree-vid-sub">${v.duration} · ${v.video_id}</span>
+                </div>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    });
+
+    if (matchCount === 0) {
+      html = `
+        <div class="tree-no-match">
+          <i class="fas fa-search-minus"></i>
+          <p>無符合「${filterText}」的逐字稿</p>
+        </div>
+      `;
+    }
+
+    treeContainer.innerHTML = html;
+
+    // Attach tree chapter accordion toggles
+    treeContainer.querySelectorAll(".tree-chapter-header").forEach(hdr => {
+      hdr.addEventListener("click", () => {
+        const group = hdr.parentElement;
+        group.classList.toggle("open");
+      });
+    });
+
+    // Attach tree video selection buttons
+    treeContainer.querySelectorAll(".tree-video-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        treeContainer.querySelectorAll(".tree-video-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const vid = btn.dataset.videoId;
+        this.selectedTranscriptVideoId = vid;
+        this.displayTranscript(vid);
+      });
+    });
+  }
+
+  displayTranscript(videoId) {
+    const reader = document.getElementById("transcripts-reader");
+    if (!reader || typeof FULL_TRANSCRIPTS_DATABASE === "undefined") return;
+
+    let targetVideo = null;
+    let targetChapter = null;
+
+    for (const ch of FULL_TRANSCRIPTS_DATABASE) {
+      const v = ch.videos.find(x => x.video_id === videoId);
+      if (v) {
+        targetVideo = v;
+        targetChapter = ch;
+        break;
+      }
+    }
+
+    if (!targetVideo) return;
+
+    // Format transcript text into styled sections
+    const rawText = targetVideo.transcript_zh;
+    // Highlight headers like 【...】 into styled block headers
+    const formattedHtml = rawText.split("\n\n").map(para => {
+      para = para.trim();
+      if (!para) return "";
+      if (para.startsWith("【") && para.includes("】")) {
+        const titleEnd = para.indexOf("】") + 1;
+        const head = para.substring(0, titleEnd);
+        const body = para.substring(titleEnd).trim();
+        return `
+          <div class="transcript-section-block">
+            <h4 class="transcript-section-heading"><i class="fas fa-bookmark text-accent"></i> ${head}</h4>
+            <p class="transcript-paragraph">${body}</p>
+          </div>
+        `;
+      }
+      return `<p class="transcript-paragraph">${para}</p>`;
+    }).join("");
+
+    reader.innerHTML = `
+      <div class="reader-header-card">
+        <div class="reader-meta-row">
+          <span class="chap-badge">${targetChapter.chapter_num}：${targetChapter.chapter_title_zh}</span>
+          <span class="reader-duration"><i class="far fa-clock"></i> 影片長度：${targetVideo.duration}</span>
+        </div>
+
+        <h2 class="reader-video-title">${targetVideo.title_zh}</h2>
+        <div class="reader-en-title">${targetVideo.title_en}</div>
+
+        <div class="reader-toolbar">
+          <button class="btn btn-primary btn-sm" id="btn-reader-play" data-video-id="${targetVideo.video_id}">
+            <i class="fab fa-youtube"></i> 彈窗播放對應影片
+          </button>
+          <a href="${targetVideo.youtube_url}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm">
+            <i class="fas fa-external-link-alt"></i> 前往 YouTube 觀看
+          </a>
+          <button class="btn btn-outline btn-sm" id="btn-reader-copy">
+            <i class="fas fa-copy"></i> 複製全文逐字稿
+          </button>
+          <span class="copy-toast" id="copy-toast"><i class="fas fa-check"></i> 已成功複製講義內容！</span>
+        </div>
+      </div>
+
+      <div class="reader-summary-box">
+        <h4><i class="fas fa-info-circle text-accent"></i> 課程內容綱要</h4>
+        <p>${targetVideo.summary}</p>
+      </div>
+
+      <div class="reader-keypoints-box">
+        <h4><i class="fas fa-lightbulb text-amber"></i> 核心工程技術提煉</h4>
+        <ul>
+          ${targetVideo.key_points.map(pt => `<li>${pt}</li>`).join("")}
+        </ul>
+      </div>
+
+      <div class="reader-transcript-content">
+        <div class="transcript-content-header">
+          <h3><i class="fas fa-stream"></i> 中文完整技術演講逐字稿與講義</h3>
+          <span class="text-muted">字數：${targetVideo.transcript_zh.length} 字</span>
+        </div>
+        <div class="transcript-body-text">
+          ${formattedHtml}
+        </div>
+      </div>
+    `;
+
+    // Attach play event
+    reader.querySelector("#btn-reader-play").addEventListener("click", () => {
+      this.playVideo(targetVideo.video_id);
+    });
+
+    // Attach copy event
+    reader.querySelector("#btn-reader-copy").addEventListener("click", () => {
+      const fullTextToCopy = `=== ${targetVideo.title_zh} (${targetVideo.title_en}) ===\n章節：${targetChapter.chapter_num} ${targetChapter.chapter_title_zh}\n影片網址：${targetVideo.youtube_url}\n\n【課程概要】\n${targetVideo.summary}\n\n【核心技術要點】\n` + targetVideo.key_points.map((p, i) => `${i+1}. ${p}`).join("\n") + `\n\n【中文完整逐字稿】\n${targetVideo.transcript_zh}`;
+      
+      navigator.clipboard.writeText(fullTextToCopy).then(() => {
+        const toast = document.getElementById("copy-toast");
+        if (toast) {
+          toast.classList.add("show");
+          setTimeout(() => toast.classList.remove("show"), 2500);
+        }
+      }).catch(err => {
+        console.error("Copy failed", err);
       });
     });
   }
