@@ -129,6 +129,63 @@ class App {
     }
   }
 
+  getVideoInfo(videoId) {
+    if (typeof FULL_TRANSCRIPTS_DATABASE !== "undefined") {
+      for (const ch of FULL_TRANSCRIPTS_DATABASE) {
+        const v = ch.videos.find(x => x.video_id === videoId);
+        if (v) {
+          return {
+            id: v.video_id,
+            titleZh: v.title_zh,
+            titleEn: v.title_en,
+            duration: v.duration,
+            summary: v.summary,
+            chapterNum: ch.chapter_num,
+            chapterTitle: ch.chapter_title_zh,
+            hasTranscript: true
+          };
+        }
+      }
+    }
+    if (typeof CURRICULUM_CHAPTERS !== "undefined") {
+      for (const ch of CURRICULUM_CHAPTERS) {
+        const v = ch.videos.find(x => x.id === videoId);
+        if (v) {
+          return {
+            id: v.id,
+            titleZh: v.titleZh,
+            titleEn: v.titleEn,
+            duration: v.duration,
+            summary: v.summary,
+            chapterNum: ch.number,
+            chapterTitle: ch.titleZh,
+            hasTranscript: true
+          };
+        }
+      }
+    }
+    return null;
+  }
+
+  getComponentsForVideo(videoId) {
+    if (typeof PLANT_COMPONENTS === "undefined") return [];
+    return PLANT_COMPONENTS.filter(comp => {
+      if (Array.isArray(comp.relatedVideoIds) && comp.relatedVideoIds.includes(videoId)) return true;
+      return comp.relatedVideoId === videoId;
+    });
+  }
+
+  openTranscriptViewForVideo(videoId) {
+    this.switchTab("transcripts");
+    this.selectedTranscriptVideoId = videoId;
+    this.renderTranscriptsTree();
+    this.displayTranscript(videoId);
+    const readerEl = document.getElementById("transcripts-reader");
+    if (readerEl) {
+      readerEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
   displayComponentDetails(comp) {
     const panel = document.getElementById("component-detail-panel");
     if (!panel) return;
@@ -140,10 +197,20 @@ class App {
       btn.classList.add("active");
     }
 
+    // Resolve mapped videos
+    const vids = (Array.isArray(comp.relatedVideoIds) && comp.relatedVideoIds.length > 0)
+      ? comp.relatedVideoIds
+      : (comp.relatedVideoId ? [comp.relatedVideoId] : []);
+
+    const mappedVideos = vids.map(vid => this.getVideoInfo(vid)).filter(Boolean);
+
     panel.innerHTML = `
       <div class="comp-detail-card">
         <div class="comp-detail-header">
-          <div class="comp-badge">${comp.category}</div>
+          <div class="comp-badge-group">
+            <span class="comp-badge">${comp.category}</span>
+            <span class="comp-trans-count-badge"><i class="fas fa-book"></i> 收錄 ${mappedVideos.length} 篇逐字稿</span>
+          </div>
           <h3><i class="fas ${comp.icon}"></i> ${comp.nameZh}</h3>
           <div class="comp-en-name">${comp.nameEn}</div>
         </div>
@@ -171,18 +238,65 @@ class App {
           </div>
         </div>
 
+        <div class="comp-section comp-transcripts-section">
+          <div class="comp-transcripts-header">
+            <h4><i class="fas fa-layer-group text-accent"></i> 對應技術逐字稿與影片 (${mappedVideos.length} 篇)</h4>
+          </div>
+          <p class="comp-transcripts-hint">本組件在 46 部工程講義中涵蓋下列專題課程，點擊可直接閱讀全文逐字稿或播放動畫：</p>
+          <div class="comp-transcripts-scroll-list">
+            ${mappedVideos.map((v, idx) => `
+              <div class="comp-transcript-item">
+                <div class="comp-trans-item-header">
+                  <span class="comp-trans-num">#${idx + 1}</span>
+                  <span class="comp-trans-chap">${v.chapterNum}</span>
+                  <span class="comp-trans-duration"><i class="far fa-clock"></i> ${v.duration}</span>
+                </div>
+                <div class="comp-trans-title">${v.titleZh}</div>
+                <div class="comp-trans-en">${v.titleEn}</div>
+                <div class="comp-trans-actions">
+                  <button class="btn-comp-action btn-read-transcript" data-video-id="${v.id}">
+                    <i class="fas fa-file-alt"></i> 閱讀逐字稿
+                  </button>
+                  <button class="btn-comp-action btn-play-mapped-video" data-video-id="${v.id}">
+                    <i class="fab fa-youtube"></i> 播放影片
+                  </button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
         <div class="comp-action-box">
-          <button class="btn btn-primary btn-block" id="btn-watch-comp-video" data-video-id="${comp.relatedVideoId}">
-            <i class="fab fa-youtube"></i> 觀看對應系統動畫教學影片
+          <button class="btn btn-primary btn-block" id="btn-watch-comp-video" data-video-id="${comp.relatedVideoId || (mappedVideos[0] && mappedVideos[0].id)}">
+            <i class="fab fa-youtube"></i> 觀看主系統核心動畫影片
           </button>
         </div>
       </div>
     `;
 
-    panel.querySelector("#btn-watch-comp-video").addEventListener("click", (e) => {
-      const vid = e.currentTarget.dataset.videoId;
-      this.playVideo(vid);
+    // Attach read transcript event
+    panel.querySelectorAll(".btn-read-transcript").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const vid = e.currentTarget.dataset.videoId;
+        this.openTranscriptViewForVideo(vid);
+      });
     });
+
+    // Attach play video event
+    panel.querySelectorAll(".btn-play-mapped-video").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const vid = e.currentTarget.dataset.videoId;
+        this.playVideo(vid);
+      });
+    });
+
+    const watchMainBtn = panel.querySelector("#btn-watch-comp-video");
+    if (watchMainBtn) {
+      watchMainBtn.addEventListener("click", (e) => {
+        const vid = e.currentTarget.dataset.videoId;
+        if (vid) this.playVideo(vid);
+      });
+    }
   }
 
   initVideoView() {
@@ -627,6 +741,9 @@ class App {
 
     if (!targetVideo) return;
 
+    // Find linked plant diagram components
+    const linkedComponents = this.getComponentsForVideo(videoId);
+
     // Format transcript text into styled sections
     const rawText = targetVideo.transcript_zh;
     // Highlight headers like 【...】 into styled block headers
@@ -656,6 +773,22 @@ class App {
 
         <h2 class="reader-video-title">${targetVideo.title_zh}</h2>
         <div class="reader-en-title">${targetVideo.title_en}</div>
+
+        ${linkedComponents.length > 0 ? `
+          <div class="reader-diagram-link-banner">
+            <span class="link-banner-label"><i class="fas fa-project-diagram text-accent"></i> 技術詳解圖對應組件：</span>
+            <div class="link-banner-tags">
+              ${linkedComponents.map(comp => `
+                <button class="btn-locate-diagram-comp" data-comp-id="${comp.id}" title="點擊切換至技術架構圖並定位此組件">
+                  <span class="comp-idx-pill">#${comp.number}</span>
+                  <span class="comp-name-pill">${comp.nameZh}</span>
+                  <i class="fas fa-crosshairs locate-icon"></i>
+                  <span class="locate-tip">在架構圖中定位</span>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
 
         <div class="reader-toolbar">
           <button class="btn btn-primary btn-sm" id="btn-reader-play" data-video-id="${targetVideo.video_id}">
@@ -697,6 +830,21 @@ class App {
     // Attach play event
     reader.querySelector("#btn-reader-play").addEventListener("click", () => {
       this.playVideo(targetVideo.video_id);
+    });
+
+    // Attach locate in diagram event
+    reader.querySelectorAll(".btn-locate-diagram-comp").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const compId = btn.dataset.compId;
+        this.switchTab("layout");
+        if (this.diagram) {
+          this.diagram.selectComponent(compId);
+          const schematic = document.getElementById("plant-schematic");
+          if (schematic) {
+            schematic.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }
+      });
     });
 
     // Attach copy event

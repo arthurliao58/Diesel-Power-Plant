@@ -22,12 +22,17 @@ const PLANT_COMPONENTS = [
       "常用轉速 (中速機)": "750 - 1500 RPM",
       "啟動至滿載時間": "5 - 15 分鐘"
     },
-    relatedVideoId: "QDP2PCo0jMM"
+    relatedVideoId: "QDP2PCo0jMM",
+    relatedVideoIds: [
+      "QDP2PCo0jMM", "G9vjrVszunc", "0x67uVtqFqw", "9rTYXPJULkQ",
+      "RM0A1kQuXI4", "4XJbaurVizs", "orcm9bfs88w", "EuC0qQCI6Uc",
+      "31lrsp77ym0"
+    ]
   },
   {
     id: "fuel_system",
     nameZh: "燃油供應系統",
-    nameEn: "Fuel Supply System",
+    nameEn: "Fuel Supply & Injection Combustion System",
     category: "燃燒介質",
     icon: "fa-gas-pump",
     summary: "儲存、淨化、加壓並以極高精度將柴油霧化噴入氣缸燃燒室。",
@@ -42,7 +47,11 @@ const PLANT_COMPONENTS = [
       "過濾精度": "5 - 10 微米 (μm)",
       "燃料消耗率 (SFC)": "約 190 - 215 g/kWh"
     },
-    relatedVideoId: "QDP2PCo0jMM"
+    relatedVideoId: "QDP2PCo0jMM",
+    relatedVideoIds: [
+      "QDP2PCo0jMM", "E_fR6jOpxN4", "8iBLAAJR298", "_Ko0jJsQWxA",
+      "ce20BQvNIZw", "tXILRLLgVwo", "GR0oI5sDCww"
+    ]
   },
   {
     id: "air_intake",
@@ -62,7 +71,10 @@ const PLANT_COMPONENTS = [
       "中冷後溫度": "40°C - 55°C",
       "功率增益": "+30% 至 +60%"
     },
-    relatedVideoId: "Fg_-XDKppg4"
+    relatedVideoId: "Fg_-XDKppg4",
+    relatedVideoIds: [
+      "Fg_-XDKppg4", "Q2axT3wAXv4", "nXnH_DzO53Y", "FSbydOPAAF4", "hfKTh7GkVME"
+    ]
   },
   {
     id: "exhaust_system",
@@ -83,7 +95,10 @@ const PLANT_COMPONENTS = [
       "背壓限制": "< 300 - 500 mm H2O",
       "廢熱可回收比例": "約投入熱量的 25% - 30%"
     },
-    relatedVideoId: "QDP2PCo0jMM"
+    relatedVideoId: "QDP2PCo0jMM",
+    relatedVideoIds: [
+      "QDP2PCo0jMM", "XDsUqCgAUHk"
+    ]
   },
   {
     id: "cooling_system",
@@ -104,7 +119,11 @@ const PLANT_COMPONENTS = [
       "冷卻帶走熱量": "約燃油總熱值的 25% - 30%",
       "冷卻介質": "去離子軟水 + 防蝕防垢添加劑"
     },
-    relatedVideoId: "PBJ40EYqxn0"
+    relatedVideoId: "PBJ40EYqxn0",
+    relatedVideoIds: [
+      "PBJ40EYqxn0", "saJgOYoevP0", "8KLNPCT9uLY", "jf_BZb7Ekyo",
+      "tztuhXV4JJ4", "sNgr0H-okcM", "KAB33TH5etY", "0J0VrlWe1eo", "hCNViacVAXY"
+    ]
   },
   {
     id: "lubrication_system",
@@ -124,7 +143,11 @@ const PLANT_COMPONENTS = [
       "油膜厚度": "數微米 (水力動態油膜)",
       "換油週期/監控": "定期光譜油品化驗 (鐵、銅、黏度、鹼值 TBN)"
     },
-    relatedVideoId: "Nq41vK-tmkE"
+    relatedVideoId: "Nq41vK-tmkE",
+    relatedVideoIds: [
+      "ZQUO0Jrz8zs", "A291cuS8ifo", "tzJd8aHj-vg", "Nq41vK-tmkE",
+      "Cr4L37v8cQI", "0RcyfmksG_E", "Nqjn_K6hYOo"
+    ]
   },
   {
     id: "starting_system",
@@ -144,7 +167,10 @@ const PLANT_COMPONENTS = [
       "氣罐儲備容量": "連續提供 3-5 次成功啟動",
       "緊急停機響應時間": "< 1 - 2 秒 (切斷燃油與進氣)"
     },
-    relatedVideoId: "QDP2PCo0jMM"
+    relatedVideoId: "QDP2PCo0jMM",
+    relatedVideoIds: [
+      "QDP2PCo0jMM", "cC2Yo5CT_jo", "GBarpxSZR9Y"
+    ]
   },
   {
     id: "governing_system",
@@ -164,12 +190,15 @@ const PLANT_COMPONENTS = [
       "速度下垂率 (Droop)": "0% (等時模式) 或 3% - 5% (並網模式)",
       "瞬態負載響應時間": "< 1 秒恢復穩態"
     },
-    relatedVideoId: "sOIYOCZPcUM"
+    relatedVideoId: "sOIYOCZPcUM",
+    relatedVideoIds: [
+      "sOIYOCZPcUM", "CBEBt-9mRmQ", "6A-p4C-Z7Ao", "qbma8W4f-EI", "kYIkyd_Fw4o"
+    ]
   },
   {
     id: "generator",
-    nameZh: "發電機 (交流同步發電機)",
-    nameEn: "Generator / Alternator",
+    nameZh: "發電機與電網",
+    nameEn: "Generator / Alternator & Grid",
     category: "電能轉換",
     icon: "fa-plug",
     summary: "透過剛性或彈性聯軸器與柴油機曲軸同軸相連，將機械旋轉動能轉化為三相交流電能。",
@@ -185,7 +214,10 @@ const PLANT_COMPONENTS = [
       "功率因數 (cos φ)": "0.8 (滯後) - 1.0",
       "勵磁方式": "無刷旋轉整流勵磁 (Brushless Excitation)"
     },
-    relatedVideoId: "QDP2PCo0jMM"
+    relatedVideoId: "QDP2PCo0jMM",
+    relatedVideoIds: [
+      "QDP2PCo0jMM", "bvNQP95j1XA", "FFoaZQ85zbU"
+    ]
   }
 ];
 
